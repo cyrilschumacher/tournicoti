@@ -1,0 +1,36 @@
+{
+  "name": "tournicoti",
+  "description": "Automatically rotate URLs in a full screen application.",
+  "version": "0.0.1",
+  "bin": "index.js",
+  "scripts": {
+    "clean": "rimraf release",
+    "lint": "eslint .",
+    "packager": "npm run clean && electron-packager . tournicoti --out release --platform=linux --arch=all",
+    "start": "electron ."
+  },
+  "keywords": [
+    "rotate",
+    "rotator",
+    "url"
+  ],
+  "author": "Cyril Schumacher",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^2.19.0",
+    "jquery": "^3.3.1",
+    "parse-duration": "^0.1.1",
+    "pkginfo": "^0.4.1"
+  },
+  "devDependencies": {
+    "electron": "^4.0.8",
+    "electron-packager": "^13.1.1",
+    "eslint": "^5.15.1",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-jsx-a11y": "^6.2.1",
+    "eslint-plugin-react": "^7.12.4",
+    "prettier": "^1.16.4",
+    "rimraf": "^2.6.3"
+  }
+}

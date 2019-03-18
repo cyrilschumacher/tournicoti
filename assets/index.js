@@ -63,17 +63,16 @@ window.onload = () => {
   interval = interval > 2 ? interval : 2;
 
   ipcRenderer.on('url', (event, url) => {
-    clearInterval(intervalForProgress);
-
-    intervalForProgress = updateProgressBar(
-      intervalForProgress,
-      currentWindow.timeout,
-    );
-
     const webview = document.getElementById('rotate-page');
     webview.setAttribute('src', url);
     webview.addEventListener('did-finish-load', () => {
       clearTimeout(intervalForScroll);
+      clearInterval(intervalForProgress);
+
+      intervalForProgress = updateProgressBar(
+        intervalForProgress,
+        currentWindow.timeout,
+      );
 
       webview.setZoomLevel(currentWindow.zoom);
       intervalForScroll = setTimeout(scroll, interval / 4, webview, interval / 4);

@@ -29,13 +29,19 @@ function main() {
     process.exit(1);
   } else {
     const url = commander.args.splice(0, commander.args.length - 1);
+    const randomUrl = !!commander.randomUrl;
     const timeout = parse(commander.timeout);
     assertTimeout(timeout);
 
     const zoom = +commander.zoom;
     assertZoom(zoom);
 
-    window.start({ timeout, url, zoom });
+    window.start({
+      randomUrl,
+      timeout,
+      url,
+      zoom,
+    });
   }
 }
 
@@ -43,6 +49,7 @@ module.exports.initialize = () => {
   commander
     .usage('[options] <url ...>')
     .version(module.exports.version)
+    .option('-r --random-url', 'Randomly select the first URL to display.')
     .option(
       '-t --timeout <timeout>',
       `Rotation timeout with human readable duration. Minimum: ${MINIMUM_TIMEOUT_IN_SECONDS}s.`,

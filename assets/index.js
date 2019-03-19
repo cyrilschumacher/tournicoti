@@ -7,7 +7,7 @@ function scroll(webview, interval) {
       return t<.5 ? 16*t*t*t*t*t : 1+16*(--t)*t*t*t*t;
     }
 
-    const height = Math.max(document.body.scrollHeight, document.body.offsetHeight, document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight);
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
     let i = 0;
     let intervalId = setInterval(() => {
       let t = i++ / height;

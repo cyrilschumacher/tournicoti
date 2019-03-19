@@ -27,7 +27,7 @@ function onReady(options) {
   mainWindow.timeout = options.timeout;
   mainWindow.zoom = options.zoom;
 
-  let index = 0;
+  let index = options.randomUrl ? Math.floor(Math.random() * (options.url.length - 0 + 1)) + 0 : 0;
   mainWindow.webContents.on('did-finish-load', () => {
     index = rotate(mainWindow.webContents, options.url, index);
 

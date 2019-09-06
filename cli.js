@@ -23,12 +23,11 @@ function assertZoom(zoom) {
   }
 }
 
-function main() {
-  if (commander.args.length === 0) {
+function main(url) {
+  if (!url) {
     commander.outputHelp();
     process.exit(1);
   } else {
-    const url = commander.args.splice(0, commander.args.length - 1);
     const randomUrl = !!commander.randomUrl;
     const timeout = parse(commander.timeout);
     assertTimeout(timeout);
@@ -47,15 +46,16 @@ function main() {
 
 module.exports.initialize = () => {
   commander
-    .usage('[options] <url ...>')
     .version(module.exports.version)
-    .option('-r --random-url', 'Randomly select the first URL to display.')
+    .arguments('[options] [otherUrl...]')
+    .option('-r, --random-url', 'Randomly select the first URL to display.')
     .option(
-      '-t --timeout <timeout>',
+      '-t, --timeout <timeout>',
       `Rotation timeout with human readable duration. Minimum: ${MINIMUM_TIMEOUT_IN_SECONDS}s.`,
       `${MINIMUM_TIMEOUT_IN_SECONDS}s`,
     )
-    .option('-z --zoom <level>', 'Changes the zoom level to the specified level.', MINIMUM_ZOOM)
-    .action(main)
+    .option('-z, --zoom <level>', 'Changes the zoom level to the specified level.', MINIMUM_ZOOM)
     .parse(process.argv);
+
+    main(commander.args);
 };

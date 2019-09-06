@@ -28,6 +28,7 @@ function main(url) {
     commander.outputHelp();
     process.exit(1);
   } else {
+    const preventSleep = !!commander.preventSleep;
     const randomUrl = !!commander.randomUrl;
     const timeout = parse(commander.timeout);
     assertTimeout(timeout);
@@ -36,6 +37,7 @@ function main(url) {
     assertZoom(zoom);
 
     window.start({
+      preventSleep,
       randomUrl,
       timeout,
       url,
@@ -48,13 +50,14 @@ module.exports.initialize = () => {
   commander
     .version(module.exports.version)
     .arguments('[options] [otherUrl...]')
+    .option('--prevent-sleep', 'Prevent the display from going to sleep.')
     .option('-r, --random-url', 'Randomly select the first URL to display.')
+    .option('-z, --zoom <level>', 'Changes the zoom level to the specified level.', MINIMUM_ZOOM)
     .option(
       '-t, --timeout <timeout>',
       `Rotation timeout with human readable duration. Minimum: ${MINIMUM_TIMEOUT_IN_SECONDS}s.`,
       `${MINIMUM_TIMEOUT_IN_SECONDS}s`,
     )
-    .option('-z, --zoom <level>', 'Changes the zoom level to the specified level.', MINIMUM_ZOOM)
     .parse(process.argv);
 
     main(commander.args);

@@ -20,8 +20,12 @@ function onBrowserWindowCreated(e, window) {
   window.setMenu(null);
 }
 
-function onReady(options) {
+function onReady(options, config) {
   const mainWindow = new electron.BrowserWindow(WINDOW_OPTIONS);
+
+  if (options.preventSleep) {
+    config.powerSaveBlockerId = electron.powerSaveBlocker.start('prevent-display-sleep');
+  }
 
   mainWindow.loadURL(`file://${__dirname}/assets/index.html`);
   mainWindow.timeout = options.timeout;
@@ -37,14 +41,20 @@ function onReady(options) {
   });
 }
 
-function onWindowAllClosed() {
+function onWindowAllClosed(config) {
+  if (config && config.powerSaveBlockerId && electron.powerSaveBlocker.isStarted(config.powerSaveBlockerId)) {
+    electron.powerSaveBlocker.stop(config.powerSaveBlockerId);
+  }
+
   if (process.platform !== 'darwin') {
     electron.app.quit();
   }
 }
 
 module.exports.start = (options) => {
-  electron.app.once('ready', () => onReady(options));
-  electron.app.once('window-all-closed', onWindowAllClosed);
+  const config = {};
+
+  electron.app.once('ready', () => onReady(options, config));
+  electron.app.once('window-all-closed', () => onWindowAllClosed(config));
   electron.app.once('browser-window-created', onBrowserWindowCreated);
 };

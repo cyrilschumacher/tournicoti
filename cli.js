@@ -31,17 +31,25 @@ function main(url) {
     createDebug.enable('tournicoti:*');
   }
 
+  DEBUG('URL addresses: %o', url);
+
   if (!url) {
     commander.outputHelp();
     process.exit(1);
   } else {
     const preventSleep = !!commander.preventSleep;
+    DEBUG('Prevent display: %o', preventSleep);
+
     const randomUrl = !!commander.randomUrl;
+    DEBUG('Randomize URL addresses: %o', randomUrl);
+
     const timeout = parse(commander.timeout);
     assertTimeout(timeout);
+    DEBUG('Rotation timeout: %o', timeout);
 
     const zoom = +commander.zoom;
     assertZoom(zoom);
+    DEBUG('Zoom level: %o', zoom);
 
     window.start({
       preventSleep,

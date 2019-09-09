@@ -17,20 +17,20 @@
   "author": "Cyril Schumacher",
   "license": "ISC",
   "dependencies": {
-    "commander": "^2.19.0",
+    "commander": "^2.20.0",
     "debug": "^4.1.1",
     "parse-duration": "^0.1.1",
     "pkginfo": "^0.4.1"
   },
   "devDependencies": {
-    "electron": "^3.1.6",
-    "electron-packager": "^13.1.1",
-    "eslint": "^5.15.1",
-    "eslint-config-airbnb": "^17.1.0",
-    "eslint-plugin-import": "^2.16.0",
-    "eslint-plugin-jsx-a11y": "^6.2.1",
-    "eslint-plugin-react": "^7.12.4",
-    "prettier": "^1.16.4",
-    "rimraf": "^2.6.3"
+    "electron": "^3.1.13",
+    "electron-packager": "^14.0.5",
+    "eslint": "^6.3.0",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react": "^7.14.3",
+    "prettier": "^1.18.2",
+    "rimraf": "^3.0.0"
   }
 }

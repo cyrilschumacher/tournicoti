@@ -64,7 +64,7 @@ function main(url) {
 module.exports.initialize = () => {
   commander
     .version(module.exports.version)
-    .arguments('[options] [otherUrl...]')
+    .arguments('<url...>')
     .option('--prevent-sleep', 'Prevent the display from going to sleep.')
     .option('-r, --random-url', 'Randomly select the first URL to display.')
     .option('-v, --verbose', 'Enable verbose mode.')

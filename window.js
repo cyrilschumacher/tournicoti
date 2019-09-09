@@ -1,5 +1,8 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 const electron = require('electron');
+const createDebug = require('debug');
+
+const DEBUG = createDebug('tournicoti:window');
 
 const WINDOW_OPTIONS = {
   kiosk: true,
@@ -11,20 +14,26 @@ const WINDOW_OPTIONS = {
 
 function rotate(webContents, url, index) {
   const nextIndex = index < url.length ? index : 0;
-  webContents.send('url', url[nextIndex]);
+  const currentUrl = url[nextIndex];
+  DEBUG('Next URL address: %s', currentUrl);
 
+  webContents.send('url', currentUrl);
   return nextIndex + 1;
 }
 
 function onBrowserWindowCreated(e, window) {
+  DEBUG('Browser window created.');
   window.setMenu(null);
 }
 
 function onReady(options, config) {
+  DEBUG('Window initialized.');
+
   const mainWindow = new electron.BrowserWindow(WINDOW_OPTIONS);
 
   if (options.preventSleep) {
     config.powerSaveBlockerId = electron.powerSaveBlocker.start('prevent-display-sleep');
+    DEBUG('`powerSaveBlocker` module enabled (id=%s).', config.powerSaveBlockerId);
   }
 
   mainWindow.loadURL(`file://${__dirname}/assets/index.html`);
@@ -33,6 +42,7 @@ function onReady(options, config) {
 
   let index = options.randomUrl ? Math.floor(Math.random() * (options.url.length - 0 + 1)) + 0 : 0;
   mainWindow.webContents.on('did-finish-load', () => {
+    DEBUG('Page loaded.');
     index = rotate(mainWindow.webContents, options.url, index);
 
     setInterval(() => {
@@ -42,7 +52,10 @@ function onReady(options, config) {
 }
 
 function onWindowAllClosed(config) {
+  DEBUG('All window closed.');
+
   if (config && config.powerSaveBlockerId && electron.powerSaveBlocker.isStarted(config.powerSaveBlockerId)) {
+    DEBUG('Stopping `powerSaveBlocker` module.');
     electron.powerSaveBlocker.stop(config.powerSaveBlockerId);
   }
 

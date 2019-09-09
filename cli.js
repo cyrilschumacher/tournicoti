@@ -1,9 +1,11 @@
 const commander = require('commander');
 const pkginfo = require('pkginfo');
 const parse = require('parse-duration');
+const createDebug = require('debug');
 
 const window = require('./window');
 
+const DEBUG = createDebug('tournicoti:cli');
 const MINIMUM_TIMEOUT_IN_SECONDS = 30;
 const MINIMUM_ZOOM = 1;
 
@@ -24,6 +26,11 @@ function assertZoom(zoom) {
 }
 
 function main(url) {
+  const verbose = !!commander.verbose;
+  if (verbose) {
+    createDebug.enable('tournicoti:*');
+  }
+
   if (!url) {
     commander.outputHelp();
     process.exit(1);
@@ -52,6 +59,7 @@ module.exports.initialize = () => {
     .arguments('[options] [otherUrl...]')
     .option('--prevent-sleep', 'Prevent the display from going to sleep.')
     .option('-r, --random-url', 'Randomly select the first URL to display.')
+    .option('-v, --verbose', 'Enable verbose mode.')
     .option('-z, --zoom <level>', 'Changes the zoom level to the specified level.', MINIMUM_ZOOM)
     .option(
       '-t, --timeout <timeout>',
@@ -60,5 +68,5 @@ module.exports.initialize = () => {
     )
     .parse(process.argv);
 
-    main(commander.args);
+  main(commander.args);
 };

@@ -33,7 +33,7 @@ function main(url) {
 
   DEBUG('URL addresses: %o', url);
 
-  if (!url) {
+  if (!url || !url.length) {
     commander.outputHelp();
     process.exit(1);
   } else {

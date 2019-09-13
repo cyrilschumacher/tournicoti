@@ -1,5 +1,19 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 const electron = require('electron');
+
+function onUrlChange(url, currentWindow, intervalForProgress, intervalForScroll, interval) {
+  clearInterval(intervalForProgress);
+
+  intervalForProgress = updateProgressBar(intervalForProgress, currentWindow.timeout);
+
+  const webview = document.getElementById('rotate-page');
+  webview.setAttribute('src', url);
+  webview.addEventListener('did-finish-load', () => {
+    clearTimeout(intervalForScroll);
+
+    webview.setZoomLevel(currentWindow.zoom);
+    intervalForScroll = setTimeout(scroll, interval / 4, webview, interval / 4);
+  });
+}
 
 function scroll(webview, interval) {
   webview.executeJavaScript(`
@@ -56,27 +70,12 @@ window.onload = () => {
   let intervalForProgress = -1;
   let intervalForScroll = -1;
 
-  const { ipcRenderer } = electron;
   const currentWindow = electron.remote.getCurrentWindow();
 
   let interval = (currentWindow.timeout / 10) * 2;
   interval = interval > 2 ? interval : 2;
 
-  ipcRenderer.on('url', (event, url) => {
-    clearInterval(intervalForProgress);
-
-    intervalForProgress = updateProgressBar(
-      intervalForProgress,
-      currentWindow.timeout,
-    );
-
-    const webview = document.getElementById('rotate-page');
-    webview.setAttribute('src', url);
-    webview.addEventListener('did-finish-load', () => {
-      clearTimeout(intervalForScroll);
-
-      webview.setZoomLevel(currentWindow.zoom);
-      intervalForScroll = setTimeout(scroll, interval / 4, webview, interval / 4);
-    });
-  });
+  electron.ipcRenderer.on('url', (event, url) =>
+    onUrlChange(url, currentWindow, intervalForProgress, intervalForScroll, interval),
+  );
 };

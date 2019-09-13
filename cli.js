@@ -26,8 +26,7 @@ function assertZoom(zoom) {
 }
 
 function main(url) {
-  const verbose = !!commander.verbose;
-  if (verbose) {
+  if (!!commander.verbose) {
     createDebug.enable('tournicoti:*');
   }
 

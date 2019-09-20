@@ -5,28 +5,27 @@ const createDebug = require('debug');
 const DEBUG = createDebug('tournicoti:window');
 
 const WINDOW_OPTIONS = {
-  kiosk: true,
+  kiosk: false,
   webPreferences: {
-    devTools: false,
+    devTools: true,
     nodeIntegration: true,
   },
 };
 
-function rotate(webContents, url, index) {
+function getNextUrl(url, index) {
   const nextIndex = index < url.length ? index : 0;
   const currentUrl = url[nextIndex];
   DEBUG('Next URL address: %s', currentUrl);
 
-  webContents.send('url', currentUrl);
-  return nextIndex + 1;
+  return currentUrl;
 }
 
-function onBrowserWindowCreated(e, window) {
+function createWindow(event, window) {
   DEBUG('Browser window created.');
   window.setMenu(null);
 }
 
-function onReady(options, config) {
+function initWindow(options, config) {
   DEBUG('Window initialized.');
 
   const mainWindow = new electron.BrowserWindow(WINDOW_OPTIONS);
@@ -39,19 +38,25 @@ function onReady(options, config) {
   mainWindow.loadURL(`file://${__dirname}/assets/index.html`);
   mainWindow.timeout = options.timeout;
   mainWindow.zoom = options.zoom;
+  mainWindow.previewMode = options.previewMode;
 
   let index = options.randomUrl ? Math.floor(Math.random() * (options.url.length - 0 + 1)) + 0 : 0;
-  mainWindow.webContents.on('did-finish-load', () => {
+  mainWindow.webContents.on('did-finish-load', function onDidFinishLoad() {
     DEBUG('Page loaded.');
-    index = rotate(mainWindow.webContents, options.url, index);
+    mainWindow.webContents.removeListener('did-finish-load', onDidFinishLoad);
 
-    setInterval(() => {
-      index = rotate(mainWindow.webContents, options.url, index);
-    }, options.timeout);
+    if (options.previewMode) {
+      electron.ipcMain.on('get-next-url', (event, arg) => {
+        event.returnValue = getNextUrl(options.url, index++);
+      });
+    } else {
+      mainWindow.webContents.send('url', getNextUrl(options.url, index++));
+      setInterval(() => mainWindow.webContents.send('url', getNextUrl(options.url, index++)), options.timeout);
+    }
   });
 }
 
-function onWindowAllClosed(config) {
+function destroyWindow(config) {
   DEBUG('All window closed.');
 
   if (config && config.powerSaveBlockerId && electron.powerSaveBlocker.isStarted(config.powerSaveBlockerId)) {
@@ -67,7 +72,18 @@ function onWindowAllClosed(config) {
 module.exports.start = (options) => {
   const config = {};
 
-  electron.app.once('ready', () => onReady(options, config));
-  electron.app.once('window-all-closed', () => onWindowAllClosed(config));
-  electron.app.once('browser-window-created', onBrowserWindowCreated);
+  electron.app.once('ready', function onReady(launchInfo) {
+    electron.app.removeListener('ready', onReady);
+    initWindow(options, config);
+  });
+
+  electron.app.once('window-all-closed', function onWindowAllClosed() {
+    electron.app.removeListener('window-all-closed', onWindowAllClosed);
+    destroyWindow(config);
+  });
+
+  electron.app.once('browser-window-created', function onWindowAllClosed(event, window) {
+    electron.app.removeListener('window-all-closed', onWindowAllClosed);
+    createWindow(event, window);
+  });
 };

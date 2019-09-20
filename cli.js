@@ -36,6 +36,7 @@ function main(url) {
     commander.outputHelp();
     process.exit(1);
   } else {
+    const previewMode = !!commander.previewMode;
     const preventSleep = !!commander.preventSleep;
     DEBUG('Prevent display: %o', preventSleep);
 
@@ -56,6 +57,7 @@ function main(url) {
       timeout,
       url,
       zoom,
+      previewMode
     });
   }
 }
@@ -64,6 +66,7 @@ module.exports.initialize = () => {
   commander
     .version(module.exports.version)
     .arguments('<url...>')
+    .option('--preview-mode', 'Enable the \'Preview Mode\'')
     .option('--prevent-sleep', 'Prevent the display from going to sleep.')
     .option('-r, --random-url', 'Randomly select the first URL to display.')
     .option('-v, --verbose', 'Enable verbose mode.')

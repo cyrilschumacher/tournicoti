@@ -20,3 +20,14 @@ webview {
     position: absolute;
     width: 100%;
 }
+
+#preview-mode {
+    background: #3498db;
+    border: 0;
+    color: #fff;
+    display: none;
+    text-transform: uppercase;
+    padding: 12px 0;
+    top: 0;
+    width: 100%;
+}

@@ -69,10 +69,22 @@ function updateProgressBar(timeout) {
   }, 1000);
 }
 
+function onClick() {
+  const url = electron.ipcRenderer.sendSync('get-next-url');
+  const webview = document.getElementById('rotate-page');
+  webview.setAttribute('src', url);
+}
+
 window.onload = () => {
   let intervalId = -1;
 
   const currentWindow = electron.remote.getCurrentWindow();
+  if (currentWindow.previewMode) {
+    const previewModeButton = document.getElementById('preview-mode');
+    previewModeButton.style.display = "block";
+    previewModeButton.onclick = onClick;
+  }
+
   electron.ipcRenderer.on('url', (event, url) => {
     clearInterval(intervalId);
     

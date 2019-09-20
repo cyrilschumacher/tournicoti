@@ -6,7 +6,7 @@ const createDebug = require('debug');
 const window = require('./window');
 
 const DEBUG = createDebug('tournicoti:cli');
-const MINIMUM_TIMEOUT_IN_SECONDS = 30;
+const MINIMUM_TIMEOUT_IN_SECONDS = 60;
 const MINIMUM_ZOOM = 1;
 
 pkginfo(module, 'version');

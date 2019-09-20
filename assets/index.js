@@ -1,81 +1,82 @@
 const electron = require('electron');
 
-function onUrlChange(url, currentWindow, intervalForProgress, intervalForScroll, interval) {
-  clearInterval(intervalForProgress);
-
-  intervalForProgress = updateProgressBar(intervalForProgress, currentWindow.timeout);
-
+function onUrlChange(url, zoom, duration) {
   const webview = document.getElementById('rotate-page');
   webview.setAttribute('src', url);
-  webview.addEventListener('did-finish-load', () => {
-    clearTimeout(intervalForScroll);
-
-    webview.setZoomLevel(currentWindow.zoom);
-    intervalForScroll = setTimeout(scroll, interval / 4, webview, interval / 4);
+  webview.addEventListener('did-finish-load', function onDidFinishLoad () {
+    webview.removeEventListener('did-finish-load', onDidFinishLoad);
+    webview.setZoomLevel(zoom);
+    injectScrollBehavior(webview, duration);
   });
 }
 
-function scroll(webview, interval) {
+function injectScrollBehavior(webview, duration) {
   webview.executeJavaScript(`
-    function easeInOutQuint(t) {
-      return t<.5 ? 16*t*t*t*t*t : 1+16*(--t)*t*t*t*t;
+    function easeInOutQuint(t, b, _c, d) {
+      const c = _c - b
+    
+      if ((t /= d / 2) < 1) {
+        return c / 2 * t * t * t * t * t + b
+      } else {
+        return c / 2 * ((t -= 2) * t * t * t * t + 2) + b
+      }
     }
 
-    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    let i = 0;
-    let intervalId = setInterval(() => {
-      let t = i++ / height;
-      let y = easeInOutQuint(t) * i;
-      window.scrollTo(0, y);
+    function scroll() {
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const duration = ${duration};
 
-      if (y > height) {
-        clearInterval(intervalId);
-        intervalId = setTimeout(() => {
-          clearTimeout(intervalId);
+      let startTime = Date.now();
+      let reverse = reverseInitiated = false;
+      let y = 0;
 
-          i = 0;
-          intervalId = setInterval(() => {
-            t =  i++ / height;
-            y = height - easeInOutQuint(t) * i;
+      let intervalId = setInterval(() => {
+        const now = Date.now();
+        const time = now - startTime;
+        
+        if (!reverseInitiated && (y >= (height - 1))) {
+          reverseInitiated = true;
 
-            window.scrollTo(0, y);
-            if (y < 0) {
-              clearInterval(intervalId);
-            }
-          }, 1);
-        }, ${interval});
-      }
-    }, 1);
+          setTimeout(() => {
+            startTime = Date.now();
+            y = 0;
+            reverse = true;
+          }, duration / 5);
+        }
+
+        y = easeInOutQuint(time, y, height, duration);
+
+        if (reverse && ((height - y) < 1)) {
+          clearInterval(intervalId);
+        } else {
+          window.scrollTo(0, reverse ? (height - y) : y);
+        }
+      }, 1);
+    }
+    
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => scroll(), ${duration / 5})
   `);
 }
 
-function updateProgressBar(intervalForProgress, timeout) {
+function updateProgressBar(timeout) {
   const progress = document.getElementById('progress');
-  const endDate = new Date().setMilliseconds(timeout);
-
   let i = 1;
-  return setInterval(() => {
-    const date = new Date();
-    if (date > endDate) {
-      clearInterval(intervalForProgress);
-    }
 
-    const value = (100 / (timeout / 1000)) * i;
-    i += 1;
+  return setInterval(() => {
+    const value = (100 / (timeout / 1000)) * i++;
     progress.style.width = `${value}%`;
   }, 1000);
 }
 
 window.onload = () => {
-  let intervalForProgress = -1;
-  let intervalForScroll = -1;
+  let intervalId = -1;
 
   const currentWindow = electron.remote.getCurrentWindow();
-
-  let interval = (currentWindow.timeout / 10) * 2;
-  interval = interval > 2 ? interval : 2;
-
-  electron.ipcRenderer.on('url', (event, url) =>
-    onUrlChange(url, currentWindow, intervalForProgress, intervalForScroll, interval),
-  );
+  electron.ipcRenderer.on('url', (event, url) => {
+    clearInterval(intervalId);
+    
+    intervalId = updateProgressBar(currentWindow.timeout);
+    onUrlChange(url, currentWindow.zoom, currentWindow.timeout);
+  });
 };

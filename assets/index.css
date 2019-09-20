@@ -14,7 +14,7 @@ webview {
 
 #progress {
     background: #3498db;
-    bottom: 0;
+    top: 0;
     height: 5px;
     left: 0;
     position: absolute;

@@ -15,7 +15,7 @@
     "url"
   ],
   "author": "Cyril Schumacher",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "commander": "^2.20.0",
     "debug": "^4.1.1",
